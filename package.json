@@ -1,0 +1,33 @@
+{
+  "name": "dialogmanagement",
+  "version": "0.1.0",
+  "devDependencies": {
+    "@popperjs/core": "^2.10.2",
+    "autoprefixer": "^10.4.0",
+    "bootstrap": "^5.2.3",
+    "browser-sync": "^3.0.2",
+    "gulp-concat": "^2.6.1",
+    "cssnano": "^7.0.0",
+    "gulp": "^5.0.0",
+    "gulp-imagemin": "^9.1.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-postcss": "^10.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.0.0",
+    "gulp-uglify-es": "^3.0.0",
+    "node-sass-tilde-importer": "^1.0.2",
+    "pixrem": "^5.0.0",
+    "postcss": "^8.3.11",
+    "sass": "1.77.6"
+  },
+  "engines": {
+    "node": "22.14"
+  },
+  "browserslist": [
+    "last 2 versions"
+  ],
+  "scripts": {
+    "dev": "gulp",
+    "build": "gulp build"
+  }
+}
