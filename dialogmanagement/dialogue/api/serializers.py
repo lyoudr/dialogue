@@ -1,18 +1,18 @@
 from rest_framework import serializers
 
-from dialogmanagement.dialog.models import Dialog
-from dialogmanagement.utils.dialog_types import StatusChoices
-from dialogmanagement.utils.dialog_types import UserType
+from dialogmanagement.dialogue.models import Dialogue
+from dialogmanagement.utils.dialogue_types import StatusType
+from dialogmanagement.utils.dialogue_types import UserType
 
 
-class DialogSerializer(serializers.ModelSerializer[Dialog]):
+class DialogueSerializer(serializers.ModelSerializer[Dialogue]):
     username = serializers.SerializerMethodField()
 
     def get_username(self, instance):
         return instance.user.username if instance.user else None
 
     class Meta:
-        model = Dialog
+        model = Dialogue
         fields = [
             "id",
             "username",
@@ -24,9 +24,9 @@ class DialogSerializer(serializers.ModelSerializer[Dialog]):
         ]
 
 
-class DialogCreateSerializer(serializers.ModelSerializer[Dialog]):
+class DialogueCreateSerializer(serializers.ModelSerializer[Dialogue]):
     class Meta:
-        model = Dialog
+        model = Dialogue
         fields = ["content", "model"]
         extra_kwargs = {
             "content": {"required": True},
@@ -38,5 +38,5 @@ class DialogCreateSerializer(serializers.ModelSerializer[Dialog]):
         if request and request.user:
             validated_data["user"] = request.user
         validated_data["type"] = UserType.USER
-        validated_data["status"] = StatusChoices.ACTIVE
+        validated_data["status"] = StatusType.ACTIVE
         return super().create(validated_data)

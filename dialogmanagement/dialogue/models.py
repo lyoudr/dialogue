@@ -1,13 +1,13 @@
 from django.db import models
 from django.utils import timezone
 
-from dialogmanagement.utils.dialog_types import ModelChoices
-from dialogmanagement.utils.dialog_types import StatusChoices
-from dialogmanagement.utils.dialog_types import UserType
+from dialogmanagement.utils.dialogue_types import ModelType
+from dialogmanagement.utils.dialogue_types import StatusType
+from dialogmanagement.utils.dialogue_types import UserType
 
 
 # Create your models here.
-class Dialog(models.Model):
+class Dialogue(models.Model):
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
@@ -15,8 +15,8 @@ class Dialog(models.Model):
     )
     status = models.CharField(
         max_length=10,
-        choices=StatusChoices.choices,
-        default=StatusChoices.ACTIVE,
+        choices=StatusType.choices,
+        default=StatusType.ACTIVE,
     )
     content = models.TextField()
     type = models.CharField(
@@ -26,8 +26,8 @@ class Dialog(models.Model):
     )
     model = models.CharField(
         max_length=20,
-        choices=ModelChoices,
-        default=ModelChoices.GPT_4O,
+        choices=ModelType,
+        default=ModelType.GPT_4O,
     )
     created_timestamp = models.DateTimeField(default=timezone.now)
     updated_timestamp = models.DateTimeField(auto_now=True)

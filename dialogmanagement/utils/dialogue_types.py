@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class StatusChoices(models.TextChoices):
+class StatusType(models.TextChoices):
     ACTIVE = "ACTIVE"
     COMPLETED = "COMPLETE"
 
@@ -11,7 +11,7 @@ class UserType(models.TextChoices):
     AI = "AI"
 
 
-class ModelChoices(models.TextChoices):
+class ModelType(models.TextChoices):
     GPT_4 = "gpt-4"
     GPT_4O = "gpt-4o"
     GPT_4O_MINI = "gpt-4o-mini"
