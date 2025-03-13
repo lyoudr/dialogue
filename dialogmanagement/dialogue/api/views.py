@@ -1,5 +1,8 @@
 from celery import chain
+from django.core.cache import cache
+from django.db.models import Q
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin
 from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +13,7 @@ from dialogmanagement.ai_models.tasks import chat_with_ai_task
 from dialogmanagement.ai_models.tasks import create_user_dialogue
 from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.utils.dialogue_types import ModelType
+from dialogmanagement.utils.dialogue_types import StatusType
 
 from .permission import DialoguePermission
 from .serializers import DialogueCreateSerializer
@@ -24,7 +28,14 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     def get_queryset(self, *args, **kwargs):
         assert isinstance(self.request.user.id, int)
-        return self.queryset.filter(user=self.request.user)
+        latest_id = cache.get(f"user_latest_dialogue_{self.request.user.id}")
+        if latest_id:
+            return self.queryset.filter(
+                Q(user=self.request.user)
+                & Q(status=StatusType.COMPLETED)
+                & Q(id__gt=latest_id),
+            )
+        return self.queryset.filter(user=self.request.user, status=StatusType.COMPLETED)
 
     def get_serializer_class(self):
         """
@@ -68,4 +79,33 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    @action(detail=False, methods=["put"], url_path="update-dialogue")
+    def update_dialogue(self, request, pk=None):
+        """
+        Update the dialogue and store the latest dialogue ID in Redis cache.
+        """
+        latest_dialogue = (
+            Dialogue.objects.filter(user=request.user)
+            .order_by("-created_timestamp")
+            .first()
+        )
+
+        if not latest_dialogue:
+            return Response(
+                {"error": "No dialogues found for this user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Store the latest dialogue ID in Redis with a 1-day expiration
+        cache.set(
+            f"user_latest_dialogue_{request.user.id}",
+            latest_dialogue.id,
+            timeout=86400,
+        )
+
+        return Response(
+            {"message": "Dialogue updated successfully."},
+            status=status.HTTP_200_OK,
         )
