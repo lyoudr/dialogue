@@ -1,0 +1,106 @@
+[
+  {
+    "model": "ai_model.modelversion",
+    "pk": 1,
+    "fields": {
+      "ai_model": 1,
+      "name": "gpt-4"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 2,
+    "fields": {
+      "ai_model": 1,
+      "name": "gpt-4o"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 3,
+    "fields": {
+      "ai_model": 1,
+      "name": "gpt-4o-mini"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 4,
+    "fields": {
+      "ai_model": 1,
+      "name": "o1"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 5,
+    "fields": {
+      "ai_model": 1,
+      "name": "o1-pro-mode"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 6,
+    "fields": {
+      "ai_model": 1,
+      "name": "o3-mini"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 7,
+    "fields": {
+      "ai_model": 1,
+      "name": "o3-mini-high"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 8,
+    "fields": {
+      "ai_model": 1,
+      "name": "gpt-4.5"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 9,
+    "fields": {
+      "ai_model": 2,
+      "name": "llama-2-7b"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 10,
+    "fields": {
+      "ai_model": 2,
+      "name": "llama-2-13b"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 11,
+    "fields": {
+      "ai_model": 2,
+      "name": "llama-2-70b"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 12,
+    "fields": {
+      "ai_model": 2,
+      "name": "llama-3-8b"
+    }
+  },
+  {
+    "model": "ai_model.modelversion",
+    "pk": 13,
+    "fields": {
+      "ai_model": 2,
+      "name": "llama-3-70b"
+    }
+  }
+]

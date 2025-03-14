@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
+from dialogmanagement.ai_model.models import AIModel
+from dialogmanagement.ai_model.models import ModelVersion
 from dialogmanagement.dialogue.models import Dialogue
-from dialogmanagement.utils.dialogue_types import StatusType
-from dialogmanagement.utils.dialogue_types import UserType
 
 
 class DialogueSerializer(serializers.ModelSerializer[Dialogue]):
@@ -25,18 +25,40 @@ class DialogueSerializer(serializers.ModelSerializer[Dialogue]):
 
 
 class DialogueCreateSerializer(serializers.ModelSerializer[Dialogue]):
+    model_id = serializers.IntegerField()
+    model_version_id = serializers.IntegerField()
+
     class Meta:
         model = Dialogue
-        fields = ["content", "model"]
-        extra_kwargs = {
-            "content": {"required": True},
-            "model": {"required": True},
-        }
+        fields = ["content", "model_id", "model_version_id"]
 
-    def create(self, validated_data):
-        request = self.context.get("request")
-        if request and request.user:
-            validated_data["user"] = request.user
-        validated_data["type"] = UserType.USER
-        validated_data["status"] = StatusType.ACTIVE
-        return super().create(validated_data)
+    def validate(self, attrs):
+        """Validate and assign `model` and `model_version` from IDs."""
+        model_id = attrs.pop("model_id")
+        model_version_id = attrs.pop("model_version_id")
+
+        # Validate AIModel existence
+        try:
+            ai_model = AIModel.objects.get(id=model_id)
+        except AIModel.DoesNotExist as err:
+            raise serializers.ValidationError(
+                {"model_id": "Invalid AI model ID."},
+            ) from err
+
+        # Validate ModelVersion and ensure it belongs to AIModel
+        try:
+            model_version = ModelVersion.objects.get(
+                id=model_version_id,
+                ai_model=ai_model,
+            )
+        except ModelVersion.DoesNotExist as err:
+            raise serializers.ValidationError(
+                {
+                    "model_version_id": "Invalid model version ID.",
+                },
+            ) from err
+
+        # Assign validated instances
+        attrs["model"] = ai_model
+        attrs["model_version"] = model_version
+        return attrs

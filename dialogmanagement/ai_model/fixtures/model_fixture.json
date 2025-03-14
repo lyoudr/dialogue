@@ -1,0 +1,16 @@
+[
+  {
+    "model": "ai_model.aimodel",
+    "pk": 1,
+    "fields": {
+      "name": "chatgpt"
+    }
+  },
+  {
+    "model": "ai_model.aimodel",
+    "pk": 2,
+    "fields": {
+      "name": "llama"
+    }
+  }
+]

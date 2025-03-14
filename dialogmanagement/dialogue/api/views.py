@@ -9,10 +9,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from dialogmanagement.ai_models.tasks import chat_with_ai_task
-from dialogmanagement.ai_models.tasks import create_user_dialogue
 from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.utils.dialogue_types import StatusType
+from dialogmanagement.utils.tasks import chat_with_ai_task
+from dialogmanagement.utils.tasks import create_user_dialogue
 
 from .permission import DialoguePermission
 from .serializers import DialogueCreateSerializer
@@ -65,24 +65,22 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
         # Serialize the data
         serializer = self.get_serializer(data=request.data)
-        model = request.data.get("model")
         # Validate and create the dialogue object
 
         if serializer.is_valid():
             chain(
                 create_user_dialogue.s(
                     request.user.id,
-                    request.data.get("content"),
-                    model,
+                    serializer.validated_data.get("content"),
+                    request.data.get("model_id"),
+                    request.data.get("model_version_id"),
                 ),
-                # Enqueue the task in Celery
                 chat_with_ai_task.s(
                     request.user.id,
-                    model,
+                    request.data.get("model_id"),
+                    request.data.get("model_version_id"),
                 ),
             ).apply_async()
-
-            # Return a success response with the created dialogue data
             return Response(
                 {"message": "Dialogue created and AI task enqueued."},
                 status=status.HTTP_201_CREATED,

@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
-from dialogmanagement.utils.dialogue_types import ModelType
+from dialogmanagement.ai_model.models import AIModel
+from dialogmanagement.ai_model.models import ModelVersion
 from dialogmanagement.utils.dialogue_types import StatusType
 from dialogmanagement.utils.dialogue_types import UserType
 
@@ -24,10 +25,16 @@ class Dialogue(models.Model):
         choices=UserType.choices,
         default=UserType.USER,
     )
-    model = models.CharField(
-        max_length=20,
-        choices=ModelType,
-        default=ModelType.GPT_4O,
+    model = models.ForeignKey(
+        AIModel,
+        on_delete=models.CASCADE,
+        related_name="dialogues",
+    )
+    model_version = models.ForeignKey(
+        ModelVersion,
+        on_delete=models.CASCADE,
+        related_name="dialogues_2",
+        null=True,
     )
     created_timestamp = models.DateTimeField(default=timezone.now)
     updated_timestamp = models.DateTimeField(auto_now=True)
