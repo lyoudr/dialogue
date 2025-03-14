@@ -12,7 +12,6 @@ from rest_framework.viewsets import GenericViewSet
 from dialogmanagement.ai_models.tasks import chat_with_ai_task
 from dialogmanagement.ai_models.tasks import create_user_dialogue
 from dialogmanagement.dialogue.models import Dialogue
-from dialogmanagement.utils.dialogue_types import ModelType
 from dialogmanagement.utils.dialogue_types import StatusType
 
 from .permission import DialoguePermission
@@ -28,14 +27,26 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     def get_queryset(self, *args, **kwargs):
         assert isinstance(self.request.user.id, int)
+        cache_key = f"user_dialogues_{self.request.user.id}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return cached_data  # Return cached queryset
+
         latest_id = cache.get(f"user_latest_dialogue_{self.request.user.id}")
         if latest_id:
-            return self.queryset.filter(
+            queryset = self.queryset.filter(
                 Q(user=self.request.user)
                 & Q(status=StatusType.COMPLETED)
                 & Q(id__gt=latest_id),
             )
-        return self.queryset.filter(user=self.request.user, status=StatusType.COMPLETED)
+        else:
+            queryset = self.queryset.filter(
+                user=self.request.user,
+                status=StatusType.COMPLETED,
+            )
+        cache.set(cache_key, queryset, timeout=60 * 3)
+        return queryset
 
     def get_serializer_class(self):
         """
@@ -54,19 +65,20 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
         # Serialize the data
         serializer = self.get_serializer(data=request.data)
-
+        model = request.data.get("model")
         # Validate and create the dialogue object
+
         if serializer.is_valid():
             chain(
                 create_user_dialogue.s(
                     request.user.id,
                     request.data.get("content"),
-                    request.data.get("model"),
+                    model,
                 ),
                 # Enqueue the task in Celery
                 chat_with_ai_task.s(
                     request.user.id,
-                    ModelType.GPT_4O.value,
+                    model,
                 ),
             ).apply_async()
 
