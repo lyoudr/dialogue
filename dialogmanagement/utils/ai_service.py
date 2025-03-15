@@ -1,9 +1,11 @@
 import logging
-import os
 from abc import ABC
 from abc import abstractmethod
 
+import environ
 from django.utils import timezone
+from google import genai
+from google.genai import types
 from openai import OpenAI
 
 from dialogmanagement.ai_model.models import AIModel
@@ -14,6 +16,9 @@ from dialogmanagement.utils.dialogue_types import StatusType
 from dialogmanagement.utils.dialogue_types import UserType
 from dialogmanagement.utils.error_handle import AIModelError
 from dialogmanagement.utils.error_handle import NotFoundError
+
+env = environ.Env()
+env.read_env()
 
 
 # 1. Define an Abstract Base Class for AI Models
@@ -55,7 +60,7 @@ class BaseAIModel(ABC):
 class ChatGPTModel(BaseAIModel):
     def __init__(self, model_version: ModelVersion):
         super().__init__(model_version)
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = OpenAI(api_key=env("OPENAI_API_KEY"))
 
     def chat_with_ai(self, text) -> str:
         try:
@@ -70,11 +75,63 @@ class ChatGPTModel(BaseAIModel):
                 max_tokens=100,
                 n=1,
             )
-            return completion.choices[0].message.content
+            return completion.choices[0].message.content.replace("\n", " ")
         except Exception as err:
             msg = f"Unexpected error for user: {err!s}"
             logging.exception(msg)
             raise AIModelError(meassage=str(err), status_code=400) from err
+
+
+class GeminiModel(BaseAIModel):
+    def __init__(self, model_version: ModelVersion):
+        super().__init__(model_version)
+        self.client = genai.Client(
+            vertexai=True,
+            project=env("GCP_PROJECT_ID"),
+            location="us-central1",
+        )
+        self.generate_content_config = types.GenerateContentConfig(
+            temperature=0.7,
+            top_p=0.95,
+            max_output_tokens=100,
+            response_modalities=["TEXT"],
+            safety_settings=[
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HATE_SPEECH",
+                    threshold="OFF",
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold="OFF",
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold="OFF",
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HARASSMENT",
+                    threshold="OFF",
+                ),
+            ],
+        )
+
+    def chat_with_ai(self, text):
+        resp = ""
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=f"""{text}"""),
+                ],
+            ),
+        ]
+        for chunk in self.client.models.generate_content_stream(
+            model=self.model_version.name,
+            contents=contents,
+            config=self.generate_content_config,
+        ):
+            resp += chunk.text + " "
+        return resp.strip()
 
 
 # 3. Implement a Factory Class to Instantiate to the Correct AI Model
@@ -83,6 +140,7 @@ class AIModelFactory:
 
     MODEL_MAP = {
         "chatgpt": ChatGPTModel,
+        "gemini": GeminiModel,
     }
 
     @staticmethod

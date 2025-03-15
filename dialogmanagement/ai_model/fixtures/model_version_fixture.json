@@ -68,7 +68,7 @@
     "pk": 9,
     "fields": {
       "ai_model": 2,
-      "name": "llama-2-7b"
+      "name": "gemini-2.0-flash"
     }
   },
   {
@@ -76,7 +76,7 @@
     "pk": 10,
     "fields": {
       "ai_model": 2,
-      "name": "llama-2-13b"
+      "name": "gemini-2.0-pro-exp-02-05"
     }
   },
   {
@@ -84,7 +84,7 @@
     "pk": 11,
     "fields": {
       "ai_model": 2,
-      "name": "llama-2-70b"
+      "name": "gemini-2.0-flash-lite"
     }
   },
   {
@@ -92,7 +92,7 @@
     "pk": 12,
     "fields": {
       "ai_model": 2,
-      "name": "llama-3-8b"
+      "name": "gemini-2.0-flash-thinking-exp-01-21"
     }
   },
   {
@@ -100,7 +100,7 @@
     "pk": 13,
     "fields": {
       "ai_model": 2,
-      "name": "llama-3-70b"
+      "name": "gemini-1.5-flash"
     }
   }
 ]

@@ -10,7 +10,7 @@
     "model": "ai_model.aimodel",
     "pk": 2,
     "fields": {
-      "name": "llama"
+      "name": "gemini"
     }
   }
 ]

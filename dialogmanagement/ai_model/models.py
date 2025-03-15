@@ -14,12 +14,12 @@ class AIModel(models.Model):
     )
 
     def __str__(self):
-        return self.get_name_dispaly()
+        return self.name
 
 
 class ModelVersion(models.Model):
     ai_model = models.ForeignKey(AIModel, on_delete=models.CASCADE)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return f"{self.ai_model.name} - {self.name}"

@@ -29,22 +29,24 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         assert isinstance(self.request.user.id, int)
         cache_key = f"user_dialogues_{self.request.user.id}"
         cached_data = cache.get(cache_key)
+        latest_id_key = f"user_latest_dialogue_{self.request.user.id}"
+        latest_id = cache.get(latest_id_key)
 
-        if cached_data:
-            return cached_data  # Return cached queryset
-
-        latest_id = cache.get(f"user_latest_dialogue_{self.request.user.id}")
         if latest_id:
             queryset = self.queryset.filter(
                 Q(user=self.request.user)
                 & Q(status=StatusType.COMPLETED)
                 & Q(id__gt=latest_id),
-            )
-        else:
-            queryset = self.queryset.filter(
-                user=self.request.user,
-                status=StatusType.COMPLETED,
-            )
+            ).order_by("id")
+            cache.set(latest_id_key, queryset, timeout=60 * 3)
+            return queryset
+
+        if cached_data:
+            return cached_data  # Return cached queryset
+        queryset = self.queryset.filter(
+            user=self.request.user,
+            status=StatusType.COMPLETED,
+        ).order_by("id")
         cache.set(cache_key, queryset, timeout=60 * 3)
         return queryset
 

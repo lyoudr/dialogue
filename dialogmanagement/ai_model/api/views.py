@@ -15,7 +15,7 @@ class AIModelViewSet(ListModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return AIModel.objects.all()
+        return AIModel.objects.order_by("id")
 
 
 class ModelVersionViewSet(ListModelMixin, GenericViewSet):
@@ -24,4 +24,4 @@ class ModelVersionViewSet(ListModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return ModelVersion.objects.all()
+        return ModelVersion.objects.order_by("id")
