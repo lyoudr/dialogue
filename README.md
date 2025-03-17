@@ -180,3 +180,7 @@ python manage.py runserver 0.0.0.0:8000
 
 - Login in to `http://127.0.0.1:8000/admin`, and enter to page `http://127.0.0.1:8000/admin/dialogue/dialogue/`
 - You can update dialogue history here.
+
+## Branch
+
+- Please leave comment in `dev` branch
