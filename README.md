@@ -9,6 +9,8 @@ License: MIT
 
 ## Architecture
 
+![Architecture](https://github.com/lyoudr/dialogue/blob/main/architecture.png)
+
 ## Settings
 
 Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
@@ -112,6 +114,8 @@ python manage.py runserver 0.0.0.0:8000
 `http://127.0.0.1:8000/api/docs/`
 
 ## Models
+
+![Models](https://github.com/lyoudr/dialogue/blob/main/schema.png)
 
 ### User
 
