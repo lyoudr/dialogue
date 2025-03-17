@@ -27,6 +27,12 @@ OPENAI_API_KEY=$OPENAI_API_KEY
 GCP_PROJECT_ID=$GCP_PROJECT_ID
 ```
 
+- Let Server use .env file
+
+```
+export DJANGO_READ_DOT_ENV_FILE=True
+```
+
 - Authenticate to GCP
 
 ```
