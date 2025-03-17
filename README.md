@@ -99,6 +99,16 @@ python manage.py loaddata dialogmanagement/ai_model/fixtures/model_fixture.json
 python manage.py loaddata dialogmanagement/ai_model/fixtures/model_version_fixture.json
 ```
 
+### Start Server
+
+```
+python manage.py runserver 0.0.0.0:8000
+```
+
+### API Docs
+
+`http://127.0.0.1:8000/api/docs/`
+
 ## Models
 
 ### User
