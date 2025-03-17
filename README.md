@@ -144,9 +144,17 @@ python manage.py runserver 0.0.0.0:8000
   - `GET` `/api/aimodel/` Get current available ai model
   - `GET` `/api/modelversion/` Get current available ai model version
 - Dialogue:
+  - `GET` `/api/dialogue/` Get current user dialogue history
   - `POST` `/api/dialogue/` Create dialogue with selected model, and model version
-  - `GET` `/api/dialogue/` Get current user dialogue history.
-  - `PUT` `/api/dialogue/` Update dialogue history, which means you can only see the following dialogue after updating
+  - `GET` `/api/dialogue/{id}` Get specific dialogue by id
+  - `POST` `/api/dialogue/search-dialogue/` Full-text search `Dialogue` `content` field by input `keyword`, and return related dialogues
+    - Remember to modify request body to
+      ```
+      {
+        "keyword": "Hello"
+      }
+      ```
+  - `PUT` `/api/dialogue/update-dialogue` Update dialogue history, which means you can only see the following dialogue after updating
 
 ## Asynchronous Tasks
 

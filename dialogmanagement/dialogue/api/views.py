@@ -1,4 +1,7 @@
 from celery import chain
+from django.contrib.postgres.search import SearchQuery
+from django.contrib.postgres.search import SearchRank
+from django.contrib.postgres.search import SearchVector
 from django.core.cache import cache
 from django.db.models import Q
 from rest_framework import status
@@ -13,6 +16,7 @@ from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.utils.dialogue_types import StatusType
 from dialogmanagement.utils.tasks import chat_with_ai_task
 from dialogmanagement.utils.tasks import create_user_dialogue
+from dialogmanagement.utils.tasks import update_search_vector
 
 from .permission import DialoguePermission
 from .serializers import DialogueCreateSerializer
@@ -82,6 +86,7 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
                     request.data.get("model_id"),
                     request.data.get("model_version_id"),
                 ),
+                update_search_vector.s(),
             ).apply_async()
             return Response(
                 {"message": "Dialogue created and AI task enqueued."},
@@ -121,3 +126,24 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             {"message": "Dialogue updated successfully."},
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=False, methods=["post"], url_path="search-dialogue")
+    def search_dialogue(self, request, *args, **kwargs):
+        """
+        Search for dialogues based on a keyword.
+        Accepts a JSON payload with a 'keyword' field.
+        """
+        keyword = request.data.get("keyword", "").strip()
+        dialogues = (
+            Dialogue.objects.annotate(
+                rank=SearchRank(  # calculates a ranking score for each result
+                    SearchVector("content"),
+                    SearchQuery(keyword),
+                ),
+            )
+            .filter(rank__gte=0.05)
+            .order_by("-rank")
+        )
+
+        serializer = self.get_serializer(dialogues, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

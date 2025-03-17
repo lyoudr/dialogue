@@ -2,6 +2,7 @@ import logging
 
 from celery import Task
 from celery import shared_task
+from django.contrib.postgres.search import SearchVector
 
 from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.utils.ai_service import AIModelFactory
@@ -49,3 +50,8 @@ def chat_with_ai_task(
         model_id,
         model_version_id,
     )
+
+
+@shared_task()
+def update_search_vector(self=None):
+    Dialogue.objects.update(search_vector=SearchVector("content"))

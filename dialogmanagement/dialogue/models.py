@@ -1,3 +1,4 @@
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 from django.utils import timezone
 
@@ -38,6 +39,7 @@ class Dialogue(models.Model):
     )
     created_timestamp = models.DateTimeField(default=timezone.now)
     updated_timestamp = models.DateTimeField(auto_now=True)
+    search_vector = SearchVectorField(null=True)
 
     def __str__(self):
         return f"{self.id}-{self.user.username}"
