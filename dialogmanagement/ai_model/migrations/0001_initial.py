@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='AIModel',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(choices=[('chatgpt', 'Chatgpt'), ('llama', 'Llama')], default='chatgpt', max_length=10, unique=True)),
+                ('name', models.CharField(choices=[('chatgpt', 'Chatgpt'), ('gemini', 'Gemini')], default='chatgpt', max_length=10, unique=True)),
             ],
         ),
         migrations.CreateModel(

@@ -13,6 +13,28 @@ Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getti
 
 ## Basic Commands
 
+### Setting Up ENV
+
+- Create .env file in root dir
+
+```
+DATABASE_URL=$DB_URL
+OPENAI_API_KEY=$OPENAI_API_KEY
+GCP_PROJECT_ID=$GCP_PROJECT_ID
+```
+
+- Authenticate to GCP
+
+```
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service_account.json
+```
+
+### Install required pacakges
+
+```
+pip install -r requirements/local.txt
+```
+
 ### Setting Up Your Users
 
 - To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a "Verify Your E-mail Address" page. Go to your console to see a simulated email verification message. Copy the link into your browser. Now the user's email should be verified and ready to go.
@@ -22,6 +44,8 @@ Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getti
       $ python manage.py createsuperuser
 
 For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
+
+- You can create another user in /admin page
 
 ### Type checks
 
@@ -56,66 +80,72 @@ cd dialogmanagement
 celery -A config.celery_app worker -l info
 ```
 
-Please note: For Celery's import magic to work, it is important _where_ the celery commands are run. If you are in the same folder with _manage.py_, you should be right.
+### Redis
 
-To run [periodic tasks](https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html), you'll need to start the celery beat scheduler service. You can start it as a standalone process:
-
-```bash
-cd dialogmanagement
-celery -A config.celery_app beat
-```
-
-or you can embed the beat service inside a worker with the `-B` option (not recommended for production use):
+Start Redis Server as Broker.
 
 ```bash
-cd dialogmanagement
-celery -A config.celery_app worker -B -l info
+redis-server
 ```
 
-### Email Server
+### DataBase
 
-In development, it is often nice to be able to see emails that are being sent from your application. If you choose to use [Mailpit](https://github.com/axllent/mailpit) when generating the project a local SMTP server with a web interface will be available.
+- Run Migration
 
-1.  [Download the latest Mailpit release](https://github.com/axllent/mailpit/releases) for your OS.
+```
+python manage.py migrate
+```
 
-2.  Copy the binary file to the project root.
+- Load required initial data
 
-3.  Make it executable:
+```
+python manage.py loaddata dialogmanagement/ai_model/fixtures/model_fixture.json
+python manage.py loaddata dialogmanagement/ai_model/fixtures/model_version_fixture.json
+```
 
-        $ chmod +x mailpit
+## Models
 
-4.  Spin up another terminal window and start it there:
+### User
 
-        ./mailpit
+- Original Django User to allow each user login.
 
-5.  Check out <http://127.0.0.1:8025/> to see how it goes.
+### AIModel
 
-Now you have your own mail server running locally, ready to receive whatever you send it.
+- name: Define used model : (CHATGPT, GEMINI)
 
-### Sentry
+### ModelVersion
 
-Sentry is an error logging aggregator service. You can sign up for a free account at <https://sentry.io/signup/?code=cookiecutter> or download and host it yourself.
-The system is set up with reasonable defaults, including 404 logging and integration with the WSGI application.
+- ai_model: Foreign Key to **AIModel**
+- name: model version for used model, ex: "gpt-4o" or "gemini-2.0-flash"
 
-You must set the DSN url in production.
+### Dialogue
 
-## Deployment
+- user: Foreign Key to original **User**
+- status: During chat with LLM, status is ACTIVE. After finish , status is COMPLETED
+- content: text content.
+- type: Define it is AI response or user question.
+- model = Foregin Key to **AIModel**
+- model_version = Foreign Key to **model_version**
 
-The following details how to deploy this application.
+## APIs
 
-### Custom Bootstrap Compilation
+- Authentication :
+  - `POST` `/api/auth-token/` Type username and password to get token, and then use the token to do authentication
+- Authorization :
+  - Need to use `/admin` page to add required permissions ("dialogue.view_dialogue", "dialogue.add_dialogue") to user
+  - Use `DialoguePermission` in `/dialogmanagement/dialogue/ai/views.py` to do authorization
+- AIModel:
+  - `GET` `/api/aimodel/` Get current available ai model
+  - `GET` `/api/modelversion/` Get current available ai model version
+- Dialogue:
+  - `POST` `/api/dialogue/` Create dialogue with selected model, and model version
+  - `GET` `/api/dialogue/` Get current user dialogue history.
+  - `PUT` `/api/dialogue/` Update dialogue history, which means you can only see the following dialogue after updating
 
-The generated CSS is set up with automatic Bootstrap recompilation with variables of your choice.
-Bootstrap v5 is installed using npm and customised by tweaking your variables in `static/sass/custom_bootstrap_vars`.
+## Asynchronous Tasks
 
-You can find a list of available variables [in the bootstrap source](https://github.com/twbs/bootstrap/blob/v5.1.3/scss/_variables.scss), or get explanations on them in the [Bootstrap docs](https://getbootstrap.com/docs/5.1/customize/sass/).
+- Use `Celery/Redis` to handle chating with LLM asynchronously
 
-Bootstrap's javascript as well as its dependencies are concatenated into a single file: `static/js/vendors.js`.
+## Code Scalability
 
-# Admin
-
-user: admin
-password: admin
-
-user: ann
-password: annpasswd
+- Apply **Factory Mode** in `dialogmanagement/utils/ai_service.py` to allow user to chat with different LLM

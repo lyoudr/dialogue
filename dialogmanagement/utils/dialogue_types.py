@@ -13,7 +13,7 @@ class UserType(models.TextChoices):
 
 class ModelType(models.TextChoices):
     CHATGPT = "chatgpt"
-    LLAMA = "llama"
+    GEMINI = "gemini"
 
 
 class GPTModelType(models.TextChoices):
@@ -27,9 +27,10 @@ class GPTModelType(models.TextChoices):
     GPT_4_5 = "gpt-4.5"
 
 
-class LLAMAModelType(models.TextChoices):
-    LLAMA_2_7B = "llama-2-7b"
-    LLAMA_2_13B = "llama-2-13b"
-    LLAMA_2_70B = "llama-2-70b"
-    LLAMA_3_8B = "llama-3-8b"
-    LLAMA_3_70B = "llama-3-70b"
+class GeminiModelType(models.TextChoices):
+    # Added Gemini models based on provided data
+    GEMINI_2_0_FLASH = "gemini-2.0-flash"
+    GEMINI_2_0_PRO_EXP_02_05 = "gemini-2.0-pro-exp-02-05"
+    GEMINI_2_0_FLASH_LITE = "gemini-2.0-flash-lite"
+    GEMINI_2_0_FLASH_THINKING_EXP_01_21 = "gemini-2.0-flash-thinking-exp-01-21"
+    GEMINI_1_5_FLASH = "gemini-1.5-flash"

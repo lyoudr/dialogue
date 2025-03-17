@@ -1,20 +1,28 @@
+import logging
+
 from celery import Task
 from celery import shared_task
 
 from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.utils.ai_service import AIModelFactory
+from dialogmanagement.utils.error_handle import AIModelError
 
 
 class DialogueAITask(Task):
     """Celery task for handling AI response asynchronously."""
 
     def run(self, dialogue_id, user_id, model_id, model_version_id):
-        """Fetch dialogue, generate AI response, and update status."""
-        dialogue = Dialogue.objects.get(id=dialogue_id)
-        ai_model = AIModelFactory.get_model(model_id, model_version_id)
-        response = ai_model.chat_with_ai(dialogue.content)
-        ai_model.save_ai_response(user_id, response)
-        ai_model.update_dialogue_status(dialogue_id)
+        try:
+            """Fetch dialogue, generate AI response, and update status."""
+            dialogue = Dialogue.objects.get(id=dialogue_id)
+            ai_model = AIModelFactory.get_model(model_id, model_version_id)
+            response = ai_model.chat_with_ai(dialogue.content)
+            ai_model.save_ai_response(user_id, response)
+            ai_model.update_dialogue_status(dialogue_id)
+        except Exception as err:
+            msg = f"Unexpected error for user: {err!s}"
+            logging.exception(msg)
+            raise AIModelError(meassage=str(err), status_code=400) from err
 
 
 @shared_task

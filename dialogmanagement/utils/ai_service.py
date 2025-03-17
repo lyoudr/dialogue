@@ -1,4 +1,3 @@
-import logging
 from abc import ABC
 from abc import abstractmethod
 
@@ -14,7 +13,6 @@ from dialogmanagement.dialogue.models import Dialogue
 from dialogmanagement.users.models import User
 from dialogmanagement.utils.dialogue_types import StatusType
 from dialogmanagement.utils.dialogue_types import UserType
-from dialogmanagement.utils.error_handle import AIModelError
 from dialogmanagement.utils.error_handle import NotFoundError
 
 env = environ.Env()
@@ -63,23 +61,18 @@ class ChatGPTModel(BaseAIModel):
         self.client = OpenAI(api_key=env("OPENAI_API_KEY"))
 
     def chat_with_ai(self, text) -> str:
-        try:
-            """Generate AI response using OpenAI."""
-            completion = self.client.chat.completions.create(
-                model=self.model_version.name,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": text},
-                ],
-                temperature=0.3,
-                max_tokens=100,
-                n=1,
-            )
-            return completion.choices[0].message.content.replace("\n", " ")
-        except Exception as err:
-            msg = f"Unexpected error for user: {err!s}"
-            logging.exception(msg)
-            raise AIModelError(meassage=str(err), status_code=400) from err
+        """Generate AI response using OpenAI."""
+        completion = self.client.chat.completions.create(
+            model=self.model_version.name,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": text},
+            ],
+            temperature=0.3,
+            max_tokens=100,
+            n=1,
+        )
+        return completion.choices[0].message.content.replace("\n", " ")
 
 
 class GeminiModel(BaseAIModel):

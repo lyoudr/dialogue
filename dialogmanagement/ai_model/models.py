@@ -1,7 +1,7 @@
 from django.db import models
 
+from dialogmanagement.utils.dialogue_types import GeminiModelType
 from dialogmanagement.utils.dialogue_types import GPTModelType
-from dialogmanagement.utils.dialogue_types import LLAMAModelType
 from dialogmanagement.utils.dialogue_types import ModelType
 
 
@@ -34,8 +34,8 @@ class ModelVersion(models.Model):
             raise ValueError(err)
 
         if (
-            self.ai_model.name == ModelType.LLAMA
-            and self.name not in LLAMAModelType.values
+            self.ai_model.name == ModelType.GEMINI
+            and self.name not in GeminiModelType.values
         ):
             err = f"Invalid model version: {self.name}"
             raise ValueError(err)
