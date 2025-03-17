@@ -1,11 +1,13 @@
 # dialog_management
 
-A platform for managing dialog with AI
+A platform for managing user dialog with AI
 
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 License: MIT
+
+## Architecture
 
 ## Settings
 
@@ -163,3 +165,8 @@ python manage.py runserver 0.0.0.0:8000
 ## Code Scalability
 
 - Apply **Factory Mode** in `dialogmanagement/utils/ai_service.py` to allow user to chat with different LLM
+
+## Modify Dialogue
+
+- Login in to `http://127.0.0.1:8000/admin`, and enter to page `http://127.0.0.1:8000/admin/dialogue/dialogue/`
+- You can update dialogue history here.
