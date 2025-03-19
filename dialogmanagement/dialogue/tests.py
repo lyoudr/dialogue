@@ -17,6 +17,7 @@ from dialogmanagement.utils.error_handle import NotFoundError
 
 class ChatGPTModelTestCase(TestCase):
     def setUp(self):
+        self.user = User.objects.create(name="Test-User")
         self.model = AIModel.objects.create(name="chatgpt")
         self.model_version = ModelVersion.objects.create(
             name="gpt-4o",
@@ -27,14 +28,15 @@ class ChatGPTModelTestCase(TestCase):
     @patch.object(ChatGPTModel, "chat_with_ai", return_value="Mocked response")
     def test_chat_with_ai(self, mock_chat):
         # Test if chat_with_ai function is correctly mocked.
-        response = self.chat_model.chat_with_ai("Hello")
+        response = self.chat_model.chat_with_ai(self.user.id, "Hello")
         # Assertions
         self.assertEqual(response, "Mocked response")  # noqa: PT009
-        mock_chat.assert_called_once_with("Hello")
+        mock_chat.assert_called_once_with(self.user.id, "Hello")
 
 
 class GeminiModelTestCase(TestCase):
     def setUp(self):
+        self.user = User.objects.create(name="Test-User")
         self.ai_model = AIModel.objects.create(name="gemini")
         self.model_version = ModelVersion.objects.create(
             name="gemini-2.0-flash",
@@ -46,11 +48,11 @@ class GeminiModelTestCase(TestCase):
     def test_chat_with_ai(self, mock_chat):
         """Test if chat_with_ai function is correctly mocked."""
 
-        response = self.gemini_model.chat_with_ai("Hello")
+        response = self.gemini_model.chat_with_ai(self.user.id, "Hello")
 
         # Assertions
         self.assertEqual(response, "Mocked response")  # noqa: PT009
-        mock_chat.assert_called_once_with("Hello")
+        mock_chat.assert_called_once_with(self.user.id, "Hello")
 
 
 # Create a mock subclass to implement the abstract method `chat_with_ai`

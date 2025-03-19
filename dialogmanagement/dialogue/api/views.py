@@ -51,7 +51,7 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             user=self.request.user,
             status=StatusType.COMPLETED,
         ).order_by("id")
-        cache.set(cache_key, queryset, timeout=60 * 3)
+        cache.set(cache_key, queryset, timeout=60 * 1)
         return queryset
 
     def get_serializer_class(self):
@@ -121,7 +121,8 @@ class DialogueViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             latest_dialogue.id,
             timeout=86400,
         )
-
+        cache.delete(f"chat_history_gemini_{request.user.id}")
+        cache.delete(f"chat_history_openai_{request.user.id}")
         return Response(
             {"message": "Dialogue updated successfully."},
             status=status.HTTP_200_OK,

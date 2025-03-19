@@ -1,6 +1,6 @@
 # dialog_management
 
-A platform for managing user dialog with AI
+An optimized platform for managing user dialog with AI using Celery/Redis for asynchronous handling and implementing a chat history mechanism to maintain conversation continuity
 
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -80,6 +80,10 @@ To run the tests, check your test coverage, and generate an HTML coverage report
 This app comes with Celery.
 
 To run a celery worker:
+
+```bash
+export OPENAI_API_KEY=$OPENAI_API_KEY
+```
 
 ```bash
 cd dialogmanagement

@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 
 import environ
+from django.core.cache import cache
 from django.utils import timezone
 from google import genai
 from google.genai import types
@@ -27,10 +28,10 @@ class BaseAIModel(ABC):
         self.model_version = model_version
 
     @abstractmethod
-    def chat_with_ai(self, text: str) -> str:
+    def chat_with_ai(self, user_id: int, text: str) -> str:
         """Generate AI response."""
 
-    def save_ai_response(self, user_id, text: str):
+    def save_ai_response(self, user_id: int, text: str):
         """Save AI response to Dialogue model."""
         try:
             user = User.objects.get(pk=user_id)
@@ -56,26 +57,38 @@ class BaseAIModel(ABC):
 
 # 2. Implement Different Model Class
 class ChatGPTModel(BaseAIModel):
+    CACHE_TIMEOUT = 60 * 60  # 1 hour (adjust as needed)
+
     def __init__(self, model_version: ModelVersion):
         super().__init__(model_version)
         self.client = OpenAI(api_key=env("OPENAI_API_KEY"))
 
-    def chat_with_ai(self, text) -> str:
+    def chat_with_ai(self, user_id: int, text: str) -> str:
         """Generate AI response using OpenAI."""
+        cache_key = f"chat_history_openai_{user_id}"
+
+        # Retrieve previous conversation history from cache
+        conversation_history = cache.get(cache_key, [])
+
+        # Append user message
+        conversation_history.append({"role": "user", "content": text})
+        message = [{"role": "system", "content": "You are a helpful assistant."}]
         completion = self.client.chat.completions.create(
             model=self.model_version.name,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": text},
-            ],
+            messages=message + conversation_history,
             temperature=0.3,
             max_tokens=100,
             n=1,
         )
-        return completion.choices[0].message.content.replace("\n", " ")
+        ai_res = completion.choices[0].message.content.replace("\n", " ")
+        conversation_history.append({"role": "assistant", "content": ai_res})
+        cache.set(cache_key, conversation_history, timeout=self.CACHE_TIMEOUT)
+        return ai_res
 
 
 class GeminiModel(BaseAIModel):
+    CACHE_TIMEOUT = 60 * 60
+
     def __init__(self, model_version: ModelVersion):
         super().__init__(model_version)
         self.client = genai.Client(
@@ -108,23 +121,59 @@ class GeminiModel(BaseAIModel):
             ],
         )
 
-    def chat_with_ai(self, text):
+    def chat_with_ai(self, user_id: int, text: str) -> str:
+        """Generate AI response using Gemnini and store conversation history in cache."""  # noqa: E501
+        cache_key = f"chat_history_gemini_{user_id}"
+        # Retrieve previous conversation history from cache
+        raw_history = cache.get(cache_key, [])
+
+        # Ensure retrieved history is converted intovalid Gemini Content objects
+        conversation_history = []
+        for item in raw_history:
+            if isinstance(item, dict) and "role" in item and "parts" in item:
+                conversation_history.append(
+                    types.Content(
+                        role=item.get("role"),
+                        parts=[
+                            types.Part.from_text(text=p.get("text"))
+                            for p in item["parts"]
+                        ],
+                    ),
+                )
+            else:
+                conversation_history.append(item)
+
+        # Append user's message
+        user_content = types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=text)],
+        )
+        conversation_history.append(user_content)
+
         resp = ""
-        contents = [
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=f"""{text}"""),
-                ],
-            ),
-        ]
         for chunk in self.client.models.generate_content_stream(
             model=self.model_version.name,
-            contents=contents,
+            contents=conversation_history,
             config=self.generate_content_config,
         ):
             resp += chunk.text + " "
-        return resp.strip()
+        ai_res = resp.strip()
+
+        # Append AI response to history
+        assistant_content = types.Content(
+            role="assistant",
+            parts=[types.Part.from_text(text=ai_res)],
+        )
+        conversation_history.append(assistant_content)
+
+        # Convert conversation history to a format that can be stored in cache
+        serialized_history = [
+            {"role": c.role, "parts": [{"text": p.text} for p in c.parts]}
+            for c in conversation_history
+        ]
+        # Store updated conversation history in cache
+        cache.set(cache_key, serialized_history, timeout=self.CACHE_TIMEOUT)
+        return ai_res
 
 
 # 3. Implement a Factory Class to Instantiate to the Correct AI Model

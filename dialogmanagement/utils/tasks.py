@@ -17,7 +17,7 @@ class DialogueAITask(Task):
             """Fetch dialogue, generate AI response, and update status."""
             dialogue = Dialogue.objects.get(id=dialogue_id)
             ai_model = AIModelFactory.get_model(model_id, model_version_id)
-            response = ai_model.chat_with_ai(dialogue.content)
+            response = ai_model.chat_with_ai(user_id, dialogue.content)
             ai_model.save_ai_response(user_id, response)
             ai_model.update_dialogue_status(dialogue_id)
         except Exception as err:
