@@ -172,7 +172,7 @@ python manage.py runserver 0.0.0.0:8000
   - `GET` `/api/dialogue/` Get current user dialogue history
   - `POST` `/api/dialogue/` Create dialogue with selected model, and model version
   - `GET` `/api/dialogue/{id}` Get specific dialogue by id
-  - `POST` `/api/dialogue/search-dialogue/` Full-text search `Dialogue` `content` field by input `keyword`, and return related dialogues
+  - `POST` `/api/dialogue/search-dialogue/` **Full-text** search `Dialogue` `content` field by input `keyword`, and return related dialogues
     - Remember to modify request body to
       ```
       {
