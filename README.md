@@ -155,8 +155,8 @@ python manage.py runserver 0.0.0.0:8000
 - status: During chat with LLM, status is ACTIVE. After finish , status is COMPLETED
 - content: text content.
 - type: Define it is AI response or user question.
-- model = Foregin Key to **AIModel**
-- model_version = Foreign Key to **model_version**
+- model: Foregin Key to **AIModel**
+- model_version: Foreign Key to **model_version**
 
 ## APIs
 
@@ -172,7 +172,7 @@ python manage.py runserver 0.0.0.0:8000
   - `GET` `/api/dialogue/` Get current user dialogue history
   - `POST` `/api/dialogue/` Create dialogue with selected model, and model version
   - `GET` `/api/dialogue/{id}` Get specific dialogue by id
-  - `POST` `/api/dialogue/search-dialogue/` Full-text search `Dialogue` `content` field by input `keyword`, and return related dialogues
+  - `POST` `/api/dialogue/search-dialogue/` **Full-text** search `Dialogue` `content` field by input `keyword`, and return related dialogues
     - Remember to modify request body to
       ```
       {
