@@ -155,8 +155,8 @@ python manage.py runserver 0.0.0.0:8000
 - status: During chat with LLM, status is ACTIVE. After finish , status is COMPLETED
 - content: text content.
 - type: Define it is AI response or user question.
-- model = Foregin Key to **AIModel**
-- model_version = Foreign Key to **model_version**
+- model: Foregin Key to **AIModel**
+- model_version: Foreign Key to **model_version**
 
 ## APIs
 
