@@ -17,6 +17,22 @@ Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getti
 
 ## Basic Commands
 
+### Clone Project
+```
+git clone git@github.com:lyoudr/dialogue.git
+```
+
+### Virtual Environment
+```
+python3 -m venv dl_venv
+```
+
+### Install required pacakges
+
+```
+pip install -r requirements/local.txt
+```
+
 ### Setting Up ENV
 
 - Create .env file in root dir
@@ -37,12 +53,6 @@ export DJANGO_READ_DOT_ENV_FILE=True
 
 ```
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service_account.json
-```
-
-### Install required pacakges
-
-```
-pip install -r requirements/local.txt
 ```
 
 ### Setting Up Your Users
@@ -86,8 +96,7 @@ export OPENAI_API_KEY=$OPENAI_API_KEY
 ```
 
 ```bash
-cd dialogmanagement
-celery -A config.celery_app worker -l info
+yes | celery -A config.celery_app worker --loglevel=info
 ```
 
 ### Redis
